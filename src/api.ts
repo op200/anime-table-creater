@@ -119,7 +119,7 @@ export namespace bgmapi {
             const res = await axios.get<UserCollection>(`https://api.bgm.tv/v0/users/${uid}/collections/${subject_id}`);
             return res.data;
         } catch (err) {
-            console.error(err);
+            // console.error(err);
             return null;
         }
     }

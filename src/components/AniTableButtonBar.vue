@@ -18,7 +18,7 @@ const { selectedNum, selectors, bgmuid } = storeToRefs(tableDataStore);
 
 const yearRange = ref<[number, number]>([2014, 2024])
 localStore.setStore(yearRange, "yearRange")
-
+watch(yearRange, () => yearRange.value.sort(), { deep: true })
 
 const numPerYear = ref<number>(10)
 localStore.setStore(numPerYear, "numPerYear")
@@ -86,7 +86,6 @@ function importTable() {
             return response.json(); // 解析JSON数据
         })
         .then(data => {
-            console.log('获取的数据:', data);
             if ("aniItemList" in data)
                 aniItemList.value = data.aniItemList as AniItem[]
             if ("selectors" in data)
@@ -117,20 +116,31 @@ function importTable() {
 
         <div>
             <span>每年数量: </span>
-            <input type="number" step="1" v-model="numPerYear">
+            <input type="number" step="1" max="100" v-model="numPerYear">
         </div>
 
         <button @click="async () => {
             getDataButtonState = false;
             aniItemList = []
+            selectors = []
             yearRange.sort()
-            let year
+            let year: number
 
             for (year = yearRange[0]; year <= yearRange[1]; ++year) {
                 console.log('get ani by year', year, numPerYear)
                 const res = await bgmapi.search_subjects(year, numPerYear)
                 if (res !== null)
-                    res.data.forEach(v => aniItemList.push(v))
+                    res.data.forEach(v => {
+                        if (!v.date) {
+                            v.date = ((v.infobox.find(it => it.key === '放送开始')?.value || '') + '').replace('年', '-').replace('月', '-').replace('日', '-')
+                            if (v.date)
+                                while (v.date.split('-').length + v.date.split('.').length < 5)
+                                    v.date += '-1'
+                        }
+                        if (!v.date)
+                            v.date = year.toString()
+                        aniItemList.push(v)
+                    })
             }
 
             aniItemList.sort((a, b) => {
