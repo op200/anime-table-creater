@@ -1,0 +1,16 @@
+:root {
+  --color-green-1: rgb(0, 189, 126);
+  --color-green-2: hsla(160, 100%, 37%, 0.4);
+  --color-green-3: hsla(160, 87%, 38%, 0.211);
+  --color-green-4: hsla(160, 87%, 38%, 0.1);
+
+  --color-gray-1: hsla(0, 0%, 31%, 0.2);
+}
+
+body {
+  font-family: ui-sans-serif;
+}
+
+a {
+  text-decoration: none;
+}
