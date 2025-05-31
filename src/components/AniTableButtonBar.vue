@@ -79,7 +79,7 @@ function saveTable() {
 
             aniItemList.sort((a, b) => {
                 const date1 = new Date(a.date), date2 = new Date(b.date)
-                return date1.getFullYear() - date2.getFullYear()
+                return date1.getTime() - date2.getTime()
             })
 
             getDataButtonState = true;

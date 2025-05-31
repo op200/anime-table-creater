@@ -5,11 +5,12 @@ export namespace localStore {
         name = "anime-table-creater_" + name
         const jsonStr = localStorage.getItem(name)
         if (jsonStr) {
-            const tempVar: Ref<any> = JSON.parse(jsonStr)
+            const tempVar: any = JSON.parse(jsonStr)
             refVar.value = tempVar
         }
         watch(refVar,
             () => {
+                console.log(name, refVar.value, JSON.stringify(refVar.value))
                 localStorage.setItem(name, JSON.stringify(refVar.value))
             },
             { deep: true })

@@ -36,12 +36,8 @@ const mouseState = ref<boolean>(false)
             <div class="table-cell">
                 {{ aniYearGroup[0].date.substring(0, 4) }}
             </div>
-            <div class="table-cell" v-for="it in aniYearGroup"
-                @click="() => selectors.set(it.id, !selectors.get(it.id))" @mouseenter="() => {
-                    if (mouseState)
-                        selectors.set(it.id, !selectors.get(it.id))
-
-                }" :class="{ 'table-cell-selected': selectors.get(it.id), 'is-mouse-up': !mouseState }">
+            <div class="table-cell" v-for="it in aniYearGroup" @click="() => selectors[it.id] = !selectors[it.id]"
+                @mouseenter="" :class="{ 'table-cell-selected': selectors[it.id], 'is-mouse-up': !mouseState }">
                 {{ it.name_cn || it.name }}
             </div>
         </div>
@@ -53,7 +49,7 @@ const mouseState = ref<boolean>(false)
 .table-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.6rem;
+    gap: 0.4rem;
     margin: 1rem auto;
     border-collapse: collapse;
     user-select: none;
@@ -62,7 +58,7 @@ const mouseState = ref<boolean>(false)
 .table-line {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.6rem;
+    gap: 0.4rem;
     margin: 0;
     padding: 0;
 }

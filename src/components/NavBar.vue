@@ -4,7 +4,8 @@ const route = useRoute();
 
 let routers = [
     { path: '/', label: '填表' },
-    { path: '/creater', label: '自定义表格' }
+    { path: '/creater', label: '自定义表格' },
+    { path: '/about', label: '关于' },
 ]
 </script>
 

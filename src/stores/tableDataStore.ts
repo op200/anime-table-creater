@@ -7,10 +7,10 @@ import { localStore } from '@/utils'
 export const useTableDataStore = defineStore('tableData', () => {
     const selectedNum = ref<number>(0)
 
-    const selectors = ref<Map<number, boolean | undefined>>(new Map<number, boolean | undefined>())
+    const selectors = ref<Record<number, boolean | undefined>>({})
     watch(selectors, () => {
         selectedNum.value = 0
-        selectors.value.forEach(v => {
+        Object.entries(selectors.value).forEach(([k, v]) => {
             if (v) ++selectedNum.value
         })
     }, { deep: true })

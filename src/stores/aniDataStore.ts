@@ -16,12 +16,12 @@ export const useAniDataStore = defineStore('aniData', () => {
 
     if (aniItemList.value.length) {
       let year = (new Date(0)).getFullYear()
-      let index = 0
 
       aniItemList.value.forEach(v => {
+        console.log('@@@', aniYearGroups.value.length)
         const new_year = (new Date(v.date)).getFullYear()
         if (new_year === year) {
-          aniYearGroups.value[index].push(v)
+          aniYearGroups.value[aniYearGroups.value.length - 1].push(v)
         }
         else {
           year = new_year
