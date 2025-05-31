@@ -5,6 +5,7 @@ const route = useRoute();
 let routers = [
     { path: '/', label: '填表' },
     { path: '/creater', label: '自定义表格' },
+    { path: '/setting', label: '设置' },
     { path: '/about', label: '关于' },
 ]
 </script>
@@ -21,6 +22,7 @@ let routers = [
 <style scoped>
 nav {
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
     gap: 1rem;
     user-select: none;

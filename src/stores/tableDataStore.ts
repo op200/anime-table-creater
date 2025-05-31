@@ -16,5 +16,8 @@ export const useTableDataStore = defineStore('tableData', () => {
     }, { deep: true })
     localStore.setStore(selectors, "selectors")
 
-    return { selectedNum, selectors }
+    const bgmuid = ref<string | undefined>()
+    localStore.setStore(bgmuid, "bgmuid")
+
+    return { selectedNum, selectors, bgmuid }
 })

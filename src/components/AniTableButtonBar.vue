@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, watch } from 'vue';
 
-import type { AniItem, AniSubjects } from '@/api';
+import type { AniItem, UserCollection } from '@/api';
 import { bgmapi } from '@/api';
 import { localStore } from '@/utils'
 
@@ -13,7 +13,7 @@ const { aniItemList } = storeToRefs(aniDataStore);
 
 import { useTableDataStore } from '@/stores/tableDataStore'
 const tableDataStore = useTableDataStore();
-const { selectedNum } = storeToRefs(tableDataStore);
+const { selectedNum, selectors, bgmuid } = storeToRefs(tableDataStore);
 
 
 const yearRange = ref<[number, number]>([2014, 2024])
@@ -26,9 +26,10 @@ localStore.setStore(numPerYear, "numPerYear")
 
 const getDataButtonState = ref<boolean>(true)
 
-function saveTable() {
+function exportTable() {
     const data = {
         aniItemList: aniItemList.value,
+        selectors: selectors.value,
     }
     const jsonStr = JSON.stringify(data)
     const blob = new Blob([jsonStr], { type: 'application/json' })
@@ -40,6 +41,60 @@ function saveTable() {
     URL.revokeObjectURL(url);
 }
 
+function importTable() {
+    new Promise<{ ok: boolean; json: () => Promise<Object> }>((resolve, reject) => {
+        // 创建隐藏的文件输入元素
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json,application/json';
+
+        // 处理文件选择
+        input.onchange = (event: Event) => {
+            const target = event.target as HTMLInputElement;
+            const file = target.files?.[0];
+
+            if (!file) {
+                reject(new Error('未选择文件'));
+                return;
+            }
+
+            // 读取文件内容
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const content = e.target?.result as string;
+                    const jsonData = JSON.parse(content);
+                    resolve({
+                        ok: true,
+                        json: () => Promise.resolve(jsonData)
+                    });
+                } catch (error) {
+                    reject(new Error('解析JSON文件失败'));
+                }
+            };
+            reader.onerror = () => reject(new Error('读取文件失败'));
+            reader.readAsText(file);
+        };
+
+        // 触发文件选择对话框
+        input.click();
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('网络响应不正常');
+            }
+            return response.json(); // 解析JSON数据
+        })
+        .then(data => {
+            console.log('获取的数据:', data);
+            if ("aniItemList" in data)
+                aniItemList.value = data.aniItemList as AniItem[]
+            if ("selectors" in data)
+                selectors.value = data.selectors as Record<number, boolean | undefined>
+        })
+        .catch(err => console.error(err));
+}
+
 </script>
 
 
@@ -47,6 +102,7 @@ function saveTable() {
 <template>
     <div style="
             display: flex;
+            flex-wrap: wrap;
             gap: 1rem;
             text-align: center;
             justify-content: center;
@@ -71,7 +127,7 @@ function saveTable() {
             let year
 
             for (year = yearRange[0]; year <= yearRange[1]; ++year) {
-                console.log('year', year)
+                console.log('get ani by year', year, numPerYear)
                 const res = await bgmapi.search_subjects(year, numPerYear)
                 if (res !== null)
                     res.data.forEach(v => aniItemList.push(v))
@@ -87,11 +143,40 @@ function saveTable() {
             获取数据
         </button>
 
-        <button @click="saveTable">
+        <button @click="exportTable">
             导出数据
         </button>
 
-        <span>统计: {{ selectedNum }} / {{ aniItemList.length }}</span>
+        <button @click="importTable">
+            导入数据
+        </button>
+
+        <button @click="() => {
+            aniItemList.forEach(async it => {
+                const userCollection = await bgmapi.search_user_collection(bgmuid as string, it.id)
+                selectors[it.id] = userCollection?.type === 2
+            })
+        }" :class="{ 'disable-button': !bgmuid }" class="tooltip" data-tooltip="自定义提示文本">
+            自动填表
+        </button>
+
+        <button @click="() => {
+            aniItemList.forEach(it => {
+                selectors[it.id] = false
+            })
+        }">
+            全不选
+        </button>
+
+        <button @click="() => {
+            aniItemList.forEach(it => {
+                selectors[it.id] = true
+            })
+        }">
+            全选
+        </button>
+
+        <span>已看: {{ selectedNum }} / {{ aniItemList.length }}</span>
 
 
     </div>
@@ -121,5 +206,25 @@ button:hover {
     pointer-events: none;
     cursor: not-allowed;
     background-color: var(--color-gray-1);
+}
+
+.tooltip:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.3s ease 1s;
+    /* 1秒延迟 */
+}
+
+.tooltip:hover::after {
+    opacity: 1;
 }
 </style>

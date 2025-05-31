@@ -10,7 +10,6 @@ export namespace localStore {
         }
         watch(refVar,
             () => {
-                console.log(name, refVar.value, JSON.stringify(refVar.value))
                 localStorage.setItem(name, JSON.stringify(refVar.value))
             },
             { deep: true })
