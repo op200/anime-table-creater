@@ -15,10 +15,11 @@ import { useTableDataStore } from '@/stores/tableDataStore'
 const tableDataStore = useTableDataStore();
 const { selectedNum, selectors, bgmuid } = storeToRefs(tableDataStore);
 
+import { domToPng } from 'modern-screenshot'
+
 
 const yearRange = ref<[number, number]>([2014, 2024])
 localStore.setStore(yearRange, "yearRange")
-watch(yearRange, () => yearRange.value.sort(), { deep: true })
 
 const numPerYear = ref<number>(10)
 localStore.setStore(numPerYear, "numPerYear")
@@ -94,6 +95,32 @@ function importTable() {
         .catch(err => console.error(err));
 }
 
+const props = defineProps({
+    aniTable: Node,
+});
+
+async function exportPng() {
+    if (props.aniTable) {
+        let table = props.aniTable as HTMLElement
+        const padding = table.style.padding, margin = table.style.margin
+        table.style.padding = '1rem'
+        table.style.margin = '1rem'
+
+        await domToPng(table, {
+            backgroundColor: '#ffffff',
+            scale: 2,
+        })
+            .then(dataUrl => {
+                const link = document.createElement('a')
+                link.download = 'ani-table.png'
+                link.href = dataUrl
+                link.click()
+            })
+
+        table.style.padding = padding
+        table.style.margin = margin
+    }
+}
 </script>
 
 
@@ -122,7 +149,7 @@ function importTable() {
         <button @click="async () => {
             getDataButtonState = false;
             aniItemList = []
-            selectors = []
+            selectors = {}
             yearRange.sort()
             let year: number
 
@@ -164,7 +191,10 @@ function importTable() {
         <button @click="() => {
             aniItemList.forEach(async it => {
                 const userCollection = await bgmapi.search_user_collection(bgmuid as string, it.id)
-                selectors[it.id] = userCollection?.type === 2
+                if (userCollection?.type === 2)
+                    selectors[it.id] = true
+                else
+                    selectors[it.id] = undefined
             })
         }" :class="{ 'disable-button': !bgmuid }" class="tooltip" data-tooltip="自定义提示文本">
             自动填表
@@ -172,7 +202,7 @@ function importTable() {
 
         <button @click="() => {
             aniItemList.forEach(it => {
-                selectors[it.id] = false
+                selectors[it.id] = undefined
             })
         }">
             全不选
@@ -186,7 +216,9 @@ function importTable() {
             全选
         </button>
 
-        <span>已看: {{ selectedNum }} / {{ aniItemList.length }}</span>
+        <button @click="exportPng">
+            导出PNG
+        </button>
 
 
     </div>

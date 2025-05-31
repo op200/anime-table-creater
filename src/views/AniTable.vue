@@ -25,22 +25,31 @@ onMounted(() => {
 
 const mouseState = ref<boolean>(false)
 
+const aniTable = ref<Node>()
+
 </script>
 
 <template>
 
-    <AniTableButtonBar />
+    <AniTableButtonBar :aniTable="aniTable" />
 
-    <div class="table-container" @mousedown="() => mouseState = true" @mouseup="() => mouseState = false">
+
+    <div ref="aniTable" class="table-container" @mousedown="() => mouseState = true"
+        @mouseup="() => mouseState = false">
+
+        <div class="table-line" style="width: 100%;">
+            <span>已看: {{ selectedNum }} / {{ aniItemList.length }}</span>
+        </div>
+
         <div class="table-line" v-for="aniYearGroup in aniYearGroups">
             <div class="table-cell">
                 {{ aniYearGroup[0].date.substring(0, 4) }}
             </div>
-            <div class="table-cell" v-for="it in aniYearGroup" @click="() => selectors[it.id] = !selectors[it.id]"
-                @mouseenter="() => {
+            <div class="table-cell" v-for="it in aniYearGroup"
+                @click="() => selectors[it.id] = selectors[it.id] ? undefined : true" @mouseenter="() => {
                     if (mouseState)
-                        selectors[it.id] = !selectors[it.id]
-                }" :class="{ 'table-cell-selected': selectors[it.id], 'is-mouse-up': !mouseState }">
+                        selectors[it.id] = selectors[it.id] ? undefined : true
+                }" :class="{ 'selected': selectors[it.id], 'is-mouse-up': !mouseState }">
                 {{ it.name_cn || it.name }}
             </div>
         </div>
@@ -88,11 +97,19 @@ const mouseState = ref<boolean>(false)
     white-space: normal;
 }
 
+.table-cell:active {
+    background-color: var(--color-green-2);
+}
+
+.table-cell.selected:active {
+    background-color: transparent;
+}
+
 .table-cell.is-mouse-up:hover {
     background-color: var(--color-green-3);
 }
 
-.table-cell-selected {
+.table-cell.selected {
     background-color: var(--color-green-2);
 }
 
