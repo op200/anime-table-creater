@@ -19,7 +19,8 @@ const { selectedNum, selectors } = storeToRefs(tableDataStore);
 
 
 onMounted(() => {
-    aniItemList.value[0] = { ...aniItemList.value[0] } // 触发 watch
+    if (aniItemList.value.length)
+        aniItemList.value[0] = { ...aniItemList.value[0] } // 触发 watch
 })
 
 const mouseState = ref<boolean>(false)

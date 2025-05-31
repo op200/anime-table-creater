@@ -66,7 +66,6 @@ function saveTable() {
 
         <button @click="async () => {
             getDataButtonState = false;
-            // let aniSearchList: AniSubjects[] = []
             aniItemList = []
             yearRange.sort()
             let year
@@ -74,16 +73,9 @@ function saveTable() {
             for (year = yearRange[0]; year <= yearRange[1]; ++year) {
                 console.log('year', year)
                 const res = await bgmapi.search_subjects(year, numPerYear)
-                if (res !== null) {
-                    // aniSearchList.push(res)
+                if (res !== null)
                     res.data.forEach(v => aniItemList.push(v))
-                }
             }
-
-            // aniSearchList.sort((a, b) => {
-            //     const date1 = new Date(a.data[0].date), date2 = new Date(b.data[0].date)
-            //     return date1.getFullYear() - date2.getFullYear()
-            // })
 
             aniItemList.sort((a, b) => {
                 const date1 = new Date(a.date), date2 = new Date(b.date)
