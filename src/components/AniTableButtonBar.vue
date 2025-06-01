@@ -210,6 +210,13 @@ function exportPng() {
             导出PNG
         </button>
 
+        <button @click="() => {
+            aniItemList = []
+            selectors = {}
+        }">
+            清空数据
+        </button>
+
 
     </div>
 </template>

@@ -38,9 +38,12 @@ const currentlySelectedAniItem = ref<AniItem | undefined>()
     <AniTableButtonBar :aniTable="aniTable" />
 
 
+    <p v-if="aniItemList.length < 1" style="text-align: center;">点击 获取数据 从 Bangumi 获取排名靠前的数据</p>
+
+
     <div class="work-space-container">
 
-        <div class="table-container" @mousedown="() => isMouseDown = true" @mouseup="() => isMouseDown = false">
+        <div class="table-container" @mousedown="() => isMouseDown = true" @mouseup="() => isMouseDown = false" v-show="aniItemList.length">
             <div ref="aniTable" class="table-content">
 
                 <div class="table-line">
