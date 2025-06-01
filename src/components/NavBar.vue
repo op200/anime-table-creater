@@ -11,15 +11,25 @@ let routers = [
 </script>
 
 <template>
-    <nav>
-        <RouterLink v-for="it in routers" :to="it.path" :class="{ active: route.path === it.path }">
-            {{ it.label }}
-        </RouterLink>
-    </nav>
-    <hr>
+    <div class="container">
+        <nav>
+            <RouterLink v-for="it in routers" :to="it.path" :class="{ active: route.path === it.path }">
+                {{ it.label }}
+            </RouterLink>
+        </nav>
+        <hr>
+    </div>
 </template>
 
 <style scoped>
+.container {
+    padding-top: 8px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background-color: white;
+}
+
 nav {
     display: flex;
     flex-wrap: wrap;

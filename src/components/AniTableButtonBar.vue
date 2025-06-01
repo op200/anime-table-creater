@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, watch } from 'vue';
+import { ref } from 'vue';
 
 import type { AniItem, UserCollection } from '@/api';
 import { bgmapi } from '@/api';
@@ -92,7 +92,7 @@ function importTable() {
             if ("selectors" in data)
                 selectors.value = data.selectors as Record<number, boolean | undefined>
         })
-        .catch(err => console.error(err));
+        .catch(err => console.error(err))
 }
 
 const props = defineProps({
