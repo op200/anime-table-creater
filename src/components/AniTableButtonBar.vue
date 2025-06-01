@@ -191,17 +191,14 @@ function exportPng() {
         </button>
 
         <button @click="() => {
-            aniItemList.forEach(it => {
-                selectors[it.id] = undefined
-            })
-        }">
-            全不选
-        </button>
-
-        <button @click="() => {
-            aniItemList.forEach(it => {
-                selectors[it.id] = true
-            })
+            if (selectedNum === aniItemList.length)
+                aniItemList.forEach(it => {
+                    selectors[it.id] = undefined
+                })
+            else
+                aniItemList.forEach(it => {
+                    selectors[it.id] = true
+                })
         }">
             全选
         </button>
