@@ -25,7 +25,7 @@ onMounted(() => {
 
 const mouseState = ref<boolean>(false)
 
-const aniTable = ref<Node>()
+const aniTable = ref<HTMLElement>()
 
 </script>
 
@@ -37,16 +37,20 @@ const aniTable = ref<Node>()
     <div ref="aniTable" class="table-container" @mousedown="() => mouseState = true"
         @mouseup="() => mouseState = false">
 
-        <div class="table-line" style="width: 100%;">
+        <div class="table-line">
             <span>已看: {{ selectedNum }} / {{ aniItemList.length }}</span>
         </div>
 
         <div class="table-line" v-for="aniYearGroup in aniYearGroups">
-            <div class="table-cell">
+            <div class="table-cell" @click="() => {
+                aniYearGroup.forEach(v =>
+                    selectors[v.id] = selectors[v.id] ? undefined : true
+                )
+            }">
                 {{ aniYearGroup[0].date.substring(0, 4) }}
             </div>
             <div class="table-cell" v-for="it in aniYearGroup"
-                @click="() => selectors[it.id] = selectors[it.id] ? undefined : true" @mouseenter="() => {
+                @mousedown="() => selectors[it.id] = selectors[it.id] ? undefined : true" @mouseenter="() => {
                     if (mouseState)
                         selectors[it.id] = selectors[it.id] ? undefined : true
                 }" :class="{ 'selected': selectors[it.id], 'is-mouse-up': !mouseState }">
@@ -59,11 +63,12 @@ const aniTable = ref<Node>()
 
 <style scoped>
 .table-container {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
 
     gap: 0.4rem;
     margin: 1rem auto;
+    width: fit-content;
+    /* max-width: 100%; */
     border-collapse: collapse;
     user-select: none;
 }
@@ -71,9 +76,11 @@ const aniTable = ref<Node>()
 .table-line {
     display: flex;
     flex-wrap: wrap;
+    width: fit-content;
     gap: 0.4rem;
     margin: 0;
     padding: 0;
+    overflow: hidden;
 }
 
 .table-cell {
@@ -82,38 +89,34 @@ const aniTable = ref<Node>()
     justify-content: center;
     align-items: center;
 
-    font-size: 0.8rem;
     max-height: 4rem;
+    width: min-content;
     min-width: 4rem;
-    max-width: 8rem;
+
+    font-size: 0.8rem;
     padding: 1rem;
     border: 1.5px solid black;
-    border-radius: 2%;
+    border-radius: 3px;
     cursor: pointer;
 
-    white-space: inherit;
-    word-wrap: normal;
-    word-break: normal;
+    overflow-wrap: break-word;
+    word-break: keep-all;
     white-space: normal;
 }
 
-.table-cell:active {
-    background-color: var(--color-green-2);
-}
-
-.table-cell.selected:active {
-    background-color: transparent;
-}
-
 .table-cell.is-mouse-up:hover {
-    background-color: var(--color-green-3);
+    background-color: var(--color-green-2);
 }
 
 .table-cell.selected {
     background-color: var(--color-green-2);
 }
 
-.table-line>.table-cell:nth-child(1) {
+.table-cell.selected.is-mouse-up:hover {
+    background-color: transparent;
+}
+
+.table-line>.table-cell:first-child {
     background-color: pink;
     font-weight: bold;
 }

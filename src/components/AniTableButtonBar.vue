@@ -15,7 +15,7 @@ import { useTableDataStore } from '@/stores/tableDataStore'
 const tableDataStore = useTableDataStore();
 const { selectedNum, selectors, bgmuid } = storeToRefs(tableDataStore);
 
-import { domToPng } from 'modern-screenshot'
+import html2canvas from 'html2canvas'
 
 
 const yearRange = ref<[number, number]>([2014, 2024])
@@ -96,29 +96,19 @@ function importTable() {
 }
 
 const props = defineProps({
-    aniTable: Node,
+    aniTable: HTMLElement,
 });
 
-async function exportPng() {
+function exportPng() {
     if (props.aniTable) {
-        let table = props.aniTable as HTMLElement
-        const padding = table.style.padding, margin = table.style.margin
-        table.style.padding = '1rem'
-        table.style.margin = '1rem'
-
-        await domToPng(table, {
-            backgroundColor: '#ffffff',
-            scale: 2,
-        })
-            .then(dataUrl => {
-                const link = document.createElement('a')
-                link.download = 'ani-table.png'
-                link.href = dataUrl
-                link.click()
+        html2canvas(props.aniTable, { useCORS: true })
+            .then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.href = imgData;
+                link.download = 'ani-table.png';
+                link.click();
             })
-
-        table.style.padding = padding
-        table.style.margin = margin
     }
 }
 </script>
