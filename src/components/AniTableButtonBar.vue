@@ -141,8 +141,8 @@ function exportPng() {
             aniItemList = []
             selectors = {}
             yearRange.sort()
-            let year: number
 
+            let year: number
             for (year = yearRange[0]; year <= yearRange[1]; ++year) {
                 console.log('get ani by year', year, numPerYear)
                 const res = await bgmapi.search_subjects(year, numPerYear)

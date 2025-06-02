@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, watch } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import type { AniItem, AniSubjects } from '@/api.ts';
 import { bgmapi } from '@/api.ts';
 
@@ -28,6 +28,7 @@ const isMouseDown = ref<boolean>(false)
 const aniTable = ref<HTMLElement>()
 
 const currentlySelectedAniItem = ref<AniItem | undefined>()
+const gridTemplateColumns = computed(() => (currentlySelectedAniItem.value === undefined || aniItemList.value.length == 0) ? "1fr" : "3fr 1fr")
 
 </script>
 
@@ -41,9 +42,11 @@ const currentlySelectedAniItem = ref<AniItem | undefined>()
     <p v-if="aniItemList.length < 1" style="text-align: center;">点击 获取数据 从 Bangumi 获取排名靠前的数据</p>
 
 
-    <div class="work-space-container">
+    <div class="work-space-container" @dblclick="() => currentlySelectedAniItem = undefined">
 
-        <div class="table-container" @mousedown="() => isMouseDown = true" @mouseup="() => isMouseDown = false" v-show="aniItemList.length">
+        <div class="table-container" @mousedown="() => isMouseDown = true" @mouseup="() => isMouseDown = false"
+            v-show="aniItemList.length">
+
             <div ref="aniTable" class="table-content">
 
                 <div class="table-line">
@@ -51,6 +54,7 @@ const currentlySelectedAniItem = ref<AniItem | undefined>()
                 </div>
 
                 <div class="table-line" v-for="aniYearGroup in aniYearGroups">
+
                     <div class="table-cell" @click="() => {
                         aniYearGroup.forEach(v =>
                             selectors[v.id] = selectors[v.id] ? undefined : true
@@ -58,9 +62,10 @@ const currentlySelectedAniItem = ref<AniItem | undefined>()
                     }">
                         {{ aniYearGroup[0].date.substring(0, 4) }}
                     </div>
+
                     <div class="table-cell" v-for="it in aniYearGroup" @mousedown="() => {
                         selectors[it.id] = selectors[it.id] ? undefined : true
-                        currentlySelectedAniItem = currentlySelectedAniItem !== undefined && currentlySelectedAniItem.id === it.id ? undefined : it
+                        currentlySelectedAniItem = it
                     }" @mouseenter="() => {
                         if (isMouseDown)
                             selectors[it.id] = selectors[it.id] ? undefined : true
@@ -68,64 +73,74 @@ const currentlySelectedAniItem = ref<AniItem | undefined>()
                         :class="{ 'selected': selectors[it.id], 'current-selected': currentlySelectedAniItem !== undefined && it.id === currentlySelectedAniItem.id, 'is-mouse-up': !isMouseDown }">
                         {{ it.name_cn || it.name }}
                     </div>
+
                 </div>
 
             </div>
+
         </div>
 
-        <div class="detail-container" v-show="currentlySelectedAniItem">
+        <div class="detail-container" v-if="currentlySelectedAniItem"
+            @dblclick.self="() => currentlySelectedAniItem = undefined">
             <div class="detail-content">
-                <table>
+
+                <div>
+
                     <img :src="currentlySelectedAniItem?.images.small" class="background-image">
-                    <tbody>
-                        <tr>
-                            <td>UID</td>
-                            <td>
-                                <a :href="`https://bgm.tv/subject/${currentlySelectedAniItem?.id}`" target="_blank">
-                                    {{ currentlySelectedAniItem?.id }}
-                                </a>
-                                {{ currentlySelectedAniItem?.platform }}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>名称</td>
-                            <td>{{ currentlySelectedAniItem?.name }}</td>
-                        </tr>
-                        <tr>
-                            <td>中文名</td>
-                            <td>{{ currentlySelectedAniItem?.name_cn }}</td>
-                        </tr>
-                        <tr>
-                            <td>别名</td>
-                            <td>
-                                <div
-                                    v-for="name in currentlySelectedAniItem?.infobox.find(it => it.key === '别名')?.value">
-                                    {{ name.v }}
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>开始时间</td>
-                            <td>{{(() => {
-                                let dateStr = currentlySelectedAniItem?.date
-                                let date = dateStr ? new Date(dateStr).toLocaleDateString() : undefined
-                                return date ? date : '未知日期'
-                            })()}}</td>
-                        </tr>
-                        <tr>
-                            <td>集数</td>
-                            <td>{{ currentlySelectedAniItem?.eps }}</td>
-                        </tr>
-                        <tr>
-                            <td>评分</td>
-                            <td>
-                                {{ currentlySelectedAniItem?.rating.score }} 分
-                                {{ currentlySelectedAniItem?.rating.rank }} 名
-                                {{ currentlySelectedAniItem?.rating.total }} 人
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td>UID</td>
+                                <td>
+                                    <a :href="`https://bgm.tv/subject/${currentlySelectedAniItem?.id}`" target="_blank">
+                                        {{ currentlySelectedAniItem?.id }}
+                                    </a>
+                                    {{ currentlySelectedAniItem?.platform }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>名称</td>
+                                <td>{{ currentlySelectedAniItem?.name }}</td>
+                            </tr>
+                            <tr>
+                                <td>中文名</td>
+                                <td>{{ currentlySelectedAniItem?.name_cn }}</td>
+                            </tr>
+                            <tr>
+                                <td>别名</td>
+                                <td>
+                                    <div
+                                        v-for="name in currentlySelectedAniItem?.infobox.find(it => it.key === '别名')?.value">
+                                        {{ name.v }}
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>开始时间</td>
+                                <td>{{(() => {
+                                    let dateStr = currentlySelectedAniItem?.date
+                                    let date = dateStr ? new Date(dateStr).toLocaleDateString() : undefined
+                                    return date ? date : '未知日期'
+                                })()}}</td>
+                            </tr>
+                            <tr>
+                                <td>集数</td>
+                                <td>{{ currentlySelectedAniItem?.eps }}</td>
+                            </tr>
+                            <tr>
+                                <td>评分</td>
+                                <td>
+                                    {{ currentlySelectedAniItem?.rating.score }} 分
+                                    {{ currentlySelectedAniItem?.rating.rank }} 名
+                                    {{ currentlySelectedAniItem?.rating.total }} 人
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+
             </div>
         </div>
 
@@ -138,7 +153,7 @@ const currentlySelectedAniItem = ref<AniItem | undefined>()
     position: relative;
 
     display: grid;
-    grid-template-columns: 3fr 1fr;
+    grid-template-columns: v-bind(gridTemplateColumns);
 
     width: 100%;
     margin: 1rem auto;
@@ -165,6 +180,24 @@ const currentlySelectedAniItem = ref<AniItem | undefined>()
     border: 1px solid var(--color-green-1);
     border-radius: 3px;
 
+    .background-image {
+        z-index: -1;
+        position: absolute;
+        top: 0;
+        right: 0;
+        max-height: 100%;
+
+        /* 渐显遮罩（只作用于伪元素） */
+        -webkit-mask: linear-gradient(to right,
+                transparent 0%,
+                rgba(0, 0, 0, 0.3) 60%,
+                rgba(0, 0, 0, 0.9) 100%);
+        mask: linear-gradient(to right,
+                transparent 0%,
+                rgba(0, 0, 0, 0.3) 60%,
+                rgba(0, 0, 0, 0.9) 100%);
+    }
+
     table {
         width: 100%;
         border-collapse: collapse;
@@ -172,24 +205,6 @@ const currentlySelectedAniItem = ref<AniItem | undefined>()
         background-repeat: no-repeat;
         background-position: right top;
         background-size: auto 100%;
-
-        .background-image {
-            z-index: -1;
-            position: absolute;
-            top: 0;
-            right: 0;
-            max-height: 100%;
-
-            /* 渐显遮罩（只作用于伪元素） */
-            -webkit-mask: linear-gradient(to right,
-                    transparent 0%,
-                    rgba(0, 0, 0, 0.3) 60%,
-                    rgba(0, 0, 0, 0.9) 100%);
-            mask: linear-gradient(to right,
-                    transparent 0%,
-                    rgba(0, 0, 0, 0.3) 60%,
-                    rgba(0, 0, 0, 0.9) 100%);
-        }
     }
 
 
@@ -237,13 +252,22 @@ const currentlySelectedAniItem = ref<AniItem | undefined>()
     }
 }
 
+.table-container {
+    position: relative;
+
+    width: 100%;
+}
+
 .table-content {
+    /* z-index: 10000; */
+
     display: grid;
     gap: 0.4rem;
 
     user-select: none;
 
     width: fit-content;
+    margin: auto;
     padding-right: 6px;
 }
 
